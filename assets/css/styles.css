@@ -57,7 +57,7 @@
   --fs-600: clamp(1.5rem, 1.25rem + 1.2vw, 2.1rem);
   --fs-700: clamp(2rem, 1.5rem + 2.4vw, 3.2rem);
   --fs-800: clamp(2.6rem, 1.6rem + 4.6vw, 5.2rem);
-  --fs-hero: clamp(2.8rem, 1.2rem + 7vw, 7.5rem);
+  --fs-hero: clamp(2.4rem, 1.4rem + 4.6vw, 5.2rem);
 
   /* —— Spacing scale (8pt-ish, fluid section gap) —— */
   --sp-1: 0.5rem;  --sp-2: 0.75rem; --sp-3: 1rem;   --sp-4: 1.5rem;
@@ -344,7 +344,7 @@ body.has-cursor a, body.has-cursor button { cursor: none; }
    09 · HERO
 ============================================================= */
 .hero { position: relative; min-height: 100svh; display: grid; align-items: center; padding-block: 18vh 12vh; overflow: hidden; }
-.hero__inner { position: relative; z-index: 2; display: grid; gap: var(--sp-4); max-width: 56rem; }
+.hero__inner { position: relative; z-index: 2; display: grid; gap: var(--sp-3); grid-template-columns: minmax(0, 44rem); justify-content: start; text-align: left; }
 
 /* WebGL canvas — sits behind the hero content, above the page background. */
 .hero__canvas {
@@ -375,12 +375,13 @@ body.has-cursor a, body.has-cursor button { cursor: none; }
 .hero__title .char { display: inline-block; will-change: transform; }
 .hero__title .word { display: inline-block; }
 
-.hero__role { font-family: var(--font-display); font-size: var(--fs-600); font-weight: 500; display: flex; align-items: baseline; flex-wrap: wrap; }
+.hero__role { font-family: var(--font-display); font-size: clamp(1.1rem, 0.85rem + 1.1vw, 1.7rem); font-weight: 500; line-height: 1.25; min-height: 1.3em; }
+.hero__role-static { color: var(--text); }
 .hero__role-rotate { background: var(--grad-brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.hero__caret { width: 3px; height: 1em; margin-left: 2px; background: var(--accent-2); align-self: center; animation: blink 1s steps(1) infinite; }
+.hero__caret { display: inline-block; width: 3px; height: 1.05em; margin-left: 3px; vertical-align: -0.12em; background: var(--accent-2); animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
-.hero__lead { max-width: 42rem; color: var(--text-soft); font-size: var(--fs-400); }
+.hero__lead { max-width: 36rem; color: var(--text-soft); font-size: var(--fs-300); line-height: 1.7; }
 .hero__cta { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-2); }
 .hero__social { display: flex; gap: 0.6rem; margin-top: var(--sp-2); }
 .hero__social a {

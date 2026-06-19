@@ -1,50 +1,48 @@
-/* hero-webgl.js — realistic physically-based glass orb hero (Three.js) -------
-   Senior-grade WebGL background, progressively enhanced:
-   • MeshPhysicalMaterial (clearcoat + iridescence) lit by a real generated
-     studio environment (PMREM / RoomEnvironment) for believable reflections.
-   • Custom GLSL injected via onBeforeCompile: 3D simplex-noise vertex
-     displacement WITH recomputed normals, plus a neon fresnel rim glow.
-   • Orbiting colored key lights, a soft backlight glow sprite, particle field.
-   • Guards: WebGL detect, reduced-motion, off-screen / hidden pause,
-     capped DPR, debounced resize, full disposal-safe loop.
+/* hero-webgl.js — Interactive AI Globe hero (Three.js) ----------------------
+   A glowing dotted globe with neural-network connections, pulsing data nodes,
+   a glowing crystal core and orbiting particle trails. Represents global,
+   networked, AI/cloud systems — meaningful for a full-stack + AI engineer.
+
+   Layers (back → front): CSS aurora + grid → orbiting particles → neural
+   lines → globe dots → data nodes → crystal core.
+
+   Progressive enhancement & guards: WebGL detect, prefers-reduced-motion,
+   pause off-screen / when tab hidden, capped DPR, debounced resize, CSS-blob
+   fallback.
 --------------------------------------------------------------------------- */
 import { prefersReducedMotion, lerp, debounce } from './utils.js';
 
-/* —— Ashima 3D simplex noise (public domain) —— */
-const NOISE_GLSL = /* glsl */ `
-vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x,289.0);}
-vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
-float snoise(vec3 v){
-  const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
-  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);
-  vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
-  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+2.0*C.xxx; vec3 x3=x0-1.0+3.0*C.xxx;
-  i=mod(i,289.0);
-  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
-  float n_=1.0/7.0; vec3 ns=n_*D.wyz-D.xzx;
-  vec4 j=p-49.0*floor(p*ns.z*ns.z); vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
-  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);
-  vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
-  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));
-  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
-  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
-  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
-  p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;
-  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
-  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
-}
-float fbm(vec3 p,float t){ return snoise(p+t*0.22) + 0.5*snoise(p*2.1 - t*0.3); }`;
-
-/* Soft radial glow texture for the backlight sprite (canvas → texture). */
-function makeGlowTexture(THREE) {
-  const c = document.createElement('canvas'); c.width = c.height = 256;
+/* Soft round sprite (white radial) — used for dots, nodes and particles. */
+function makeDotTexture(THREE) {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
   const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-  g.addColorStop(0, 'rgba(150,120,255,0.9)');
-  g.addColorStop(0.4, 'rgba(80,120,255,0.35)');
-  g.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 256);
-  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+  const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.35, 'rgba(255,255,255,0.85)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(32, 32, 32, 0, Math.PI * 2); ctx.fill();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+/* Shared fresnel glow shader (used by the crystal core). */
+const FRESNEL_VERT = /* glsl */ `
+varying vec3 vN; varying vec3 vV;
+void main(){ vN = normalize(normalMatrix * normal); vec4 mv = modelViewMatrix * vec4(position,1.0); vV = -mv.xyz; gl_Position = projectionMatrix * mv; }`;
+const FRESNEL_FRAG = /* glsl */ `
+uniform vec3 uColor; uniform float uPow;
+varying vec3 vN; varying vec3 vV;
+void main(){ float f = pow(1.0 - clamp(dot(normalize(vN), normalize(vV)), 0.0, 1.0), uPow); gl_FragColor = vec4(uColor * f, f); }`;
+
+/** Evenly distribute N points on a sphere of radius R (Fibonacci sphere). */
+function fibonacciSphere(N, R) {
+  const pts = []; const gold = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) {
+    const y = 1 - (i / (N - 1)) * 2;
+    const r = Math.sqrt(1 - y * y);
+    const th = gold * i;
+    pts.push([Math.cos(th) * r * R, y * R, Math.sin(th) * r * R]);
+  }
+  return pts;
 }
 
 export async function initHeroWebGL() {
@@ -57,126 +55,133 @@ export async function initHeroWebGL() {
     if (!(t.getContext('webgl2') || t.getContext('webgl'))) return;
   } catch { return; }
 
-  let THREE, RoomEnvironment;
-  try {
-    THREE = await import('three');
-    ({ RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js'));
-  } catch { return; }
+  let THREE;
+  try { THREE = await import('three'); } catch { return; }
 
   const isMobile = matchMedia('(max-width: 720px)').matches;
   const DPR = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !isMobile, powerPreference: 'high-performance' });
   renderer.setPixelRatio(DPR);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.1;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
   camera.position.z = 4.4;
 
-  // Realistic reflections from a generated studio room (no HDR file needed).
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const globe = new THREE.Group();
+  globe.rotation.z = 0.32;                 // axial tilt, like a planet
+  scene.add(globe);
 
-  const group = new THREE.Group();
-  scene.add(group);
+  const dot = makeDotTexture(THREE);
+  const COL_BLUE = new THREE.Color('#8b7bff');   // purple-leaning globe dots
+  const COL_PURPLE = new THREE.Color('#7c5cff');
+  const COL_CYAN = new THREE.Color('#5ea0ff');   // soft blue accent (calmer than cyan)
 
-  /* —— shared shader uniforms for displacement + glow —— */
-  const u = {
-    uTime: { value: 0 }, uAmp: { value: 0.22 }, uFreq: { value: 0.85 },
-    uGlowA: { value: new THREE.Color('#7c5cff') },
-    uGlowB: { value: new THREE.Color('#21d4fd') },
-    uGlowStrength: { value: 1.15 },
-  };
+  const R = 1.5;
+  const N = isMobile ? 340 : 720;
+  const nodes = fibonacciSphere(N, R);
 
-  /* —— physically-based glass material with injected displacement + rim —— */
-  const mat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color('#5b46c9'),
-    metalness: 0.0, roughness: 0.16,
-    clearcoat: 1.0, clearcoatRoughness: 0.18,
-    iridescence: 1.0, iridescenceIOR: 1.35, iridescenceThicknessRange: [120, 420],
-    envMapIntensity: 1.5,
-    sheen: 0.6, sheenColor: new THREE.Color('#21d4fd'),
+  /* —— globe surface dots —— */
+  const dotPos = new Float32Array(N * 3);
+  nodes.forEach((p, i) => { dotPos[i*3] = p[0]; dotPos[i*3+1] = p[1]; dotPos[i*3+2] = p[2]; });
+  const dotGeo = new THREE.BufferGeometry();
+  dotGeo.setAttribute('position', new THREE.BufferAttribute(dotPos, 3));
+  const dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({
+    size: 0.05, map: dot, color: COL_BLUE, transparent: true, opacity: 0.9,
+    blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
+  }));
+  globe.add(dots);
+
+  /* —— neural-network connections (lines between nearby dots) —— */
+  const linePts = [];
+  const threshold = R * 0.34;
+  const maxConn = 3, maxLines = isMobile ? 600 : 1400;
+  for (let i = 0; i < N && linePts.length / 6 < maxLines; i++) {
+    let c = 0;
+    for (let j = i + 1; j < N && c < maxConn; j++) {
+      const dx = nodes[i][0]-nodes[j][0], dy = nodes[i][1]-nodes[j][1], dz = nodes[i][2]-nodes[j][2];
+      if (dx*dx + dy*dy + dz*dz < threshold * threshold) {
+        linePts.push(nodes[i][0],nodes[i][1],nodes[i][2], nodes[j][0],nodes[j][1],nodes[j][2]);
+        c++;
+      }
+    }
+  }
+  const lineGeo = new THREE.BufferGeometry();
+  lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(linePts), 3));
+  const lines = new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
+    color: COL_PURPLE, transparent: true, opacity: 0.32, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  globe.add(lines);
+
+  /* —— pulsing data nodes (a handful of bright hubs) —— */
+  const hubs = [];
+  const HUB_COUNT = isMobile ? 6 : 10;
+  for (let k = 0; k < HUB_COUNT; k++) {
+    const p = nodes[Math.floor((k + 0.5) / HUB_COUNT * N)];
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: dot, color: k % 3 === 0 ? COL_CYAN : COL_PURPLE, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.95,
+    }));
+    s.position.set(p[0], p[1], p[2]);
+    s.userData.phase = k * 0.7;
+    globe.add(s); hubs.push(s);
+  }
+
+  /* —— reusable fresnel glow material —— */
+  const makeFresnel = (color, side, pow = 2.6) => new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(color) }, uPow: { value: pow } },
+    vertexShader: FRESNEL_VERT, fragmentShader: FRESNEL_FRAG,
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side,
   });
-  if (!isMobile) { mat.transmission = 0.35; mat.thickness = 1.2; mat.ior = 1.4; }
 
-  mat.onBeforeCompile = (shader) => {
-    Object.assign(shader.uniforms, u);
-    // Vertex: displace + recompute normals from the noise field.
-    shader.vertexShader = shader.vertexShader
-      .replace('void main() {', `uniform float uTime; uniform float uAmp; uniform float uFreq;\n${NOISE_GLSL}\nvoid main() {`)
-      .replace('#include <beginnormal_vertex>', `
-        float d = fbm(position * uFreq, uTime);
-        vec3 dispPos = position + normal * d * uAmp;
-        vec3 ortho = abs(normal.y) < 0.99 ? vec3(0.0,1.0,0.0) : vec3(1.0,0.0,0.0);
-        vec3 tang = normalize(cross(normal, ortho));
-        vec3 bitang = normalize(cross(normal, tang));
-        float e = 0.18;
-        vec3 pa = position + tang * e;  pa += normal * fbm(pa * uFreq, uTime) * uAmp;
-        vec3 pb = position + bitang * e; pb += normal * fbm(pb * uFreq, uTime) * uAmp;
-        vec3 objectNormal = normalize(cross(pa - dispPos, pb - dispPos));
-        #ifdef USE_TANGENT
-          vec3 objectTangent = vec3( tangent.xyz );
-        #endif
-      `)
-      .replace('#include <begin_vertex>', 'vec3 transformed = dispPos;');
-    // Fragment: add neon fresnel rim to the lit result.
-    shader.fragmentShader = 'uniform vec3 uGlowA; uniform vec3 uGlowB; uniform float uGlowStrength;\n' +
-      shader.fragmentShader.replace('#include <opaque_fragment>', `
-        float fres = pow(1.0 - clamp(dot(normalize(vViewPosition), normal), 0.0, 1.0), 2.6);
-        outgoingLight += mix(uGlowA, uGlowB, fres) * fres * uGlowStrength;
-        #include <opaque_fragment>
-      `);
-  };
-
-  const orb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.3, isMobile ? 4 : 6), mat);
-  group.add(orb);
-
-  /* —— faint wireframe shell —— */
-  const wire = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1.62, 1),
-    new THREE.MeshBasicMaterial({ color: 0x7c5cff, wireframe: true, transparent: true, opacity: 0.1 })
+  /* —— glowing crystal core at the centre of the globe —— */
+  const core = new THREE.Group();
+  globe.add(core);
+  // soft energy glow
+  const coreGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color: new THREE.Color('#b9a8ff'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 1.0 }));
+  coreGlow.scale.setScalar(1.7); core.add(coreGlow);
+  // bright hot centre
+  const coreHot = new THREE.Sprite(new THREE.SpriteMaterial({ map: dot, color: new THREE.Color('#ffffff'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.95 }));
+  coreHot.scale.setScalar(0.7); core.add(coreHot);
+  // translucent crystal facets (fresnel, front-lit) — brighter, softer falloff
+  const crystal = new THREE.Mesh(new THREE.IcosahedronGeometry(0.58, 0), makeFresnel('#c7b8ff', THREE.FrontSide, 1.25));
+  core.add(crystal);
+  // sharp wireframe edges
+  const crystalWire = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.6, 0),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color('#9a7bff'), wireframe: true, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false })
   );
-  group.add(wire);
+  core.add(crystalWire);
 
-  /* —— orbiting colored key lights —— */
-  const lights = [
-    new THREE.PointLight(0x7c5cff, 18, 12),
-    new THREE.PointLight(0x21d4fd, 16, 12),
-    new THREE.PointLight(0xff5db1, 10, 12),
-  ];
-  lights.forEach((l) => group.add(l));
-  scene.add(new THREE.AmbientLight(0x404060, 1.2));
-
-  /* —— backlight glow sprite —— */
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(THREE), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0.7 }));
-  glow.scale.setScalar(6); glow.position.z = -1.5; group.add(glow);
-
-  /* —— particle field —— */
-  const COUNT = isMobile ? 260 : 560;
-  const pos = new Float32Array(COUNT * 3);
-  for (let i = 0; i < COUNT; i++) {
-    const r = 2.5 + (i / COUNT) * 2.6, th = i * 2.399963, ph = Math.acos(1 - 2 * ((i + 0.5) / COUNT));
-    pos[i*3] = r*Math.sin(ph)*Math.cos(th); pos[i*3+1] = r*Math.sin(ph)*Math.sin(th); pos[i*3+2] = r*Math.cos(ph);
+  /* —— orbiting particle trails (outer shell) —— */
+  const PCOUNT = isMobile ? 160 : 320;
+  const ppos = new Float32Array(PCOUNT * 3);
+  const pp = fibonacciSphere(PCOUNT, 1);
+  for (let i = 0; i < PCOUNT; i++) {
+    const r = 2.3 + (i % 7) * 0.18;
+    ppos[i*3] = pp[i][0]*r; ppos[i*3+1] = pp[i][1]*r; ppos[i*3+2] = pp[i][2]*r;
   }
   const pGeo = new THREE.BufferGeometry();
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const points = new THREE.Points(pGeo, new THREE.PointsMaterial({ size: 0.024, color: 0x9fd8ff, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
-  scene.add(points);
+  pGeo.setAttribute('position', new THREE.BufferAttribute(ppos, 3));
+  const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
+    size: 0.028, map: dot, color: new THREE.Color('#9b8cff'), transparent: true, opacity: 0.4,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  scene.add(particles);
 
   /* —— sizing —— */
   const resize = () => {
     const w = hero.clientWidth, h = hero.clientHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
-    group.position.x = w > 900 ? 1.7 : 0;
-    group.scale.setScalar(w > 900 ? 1 : 0.72);
+    globe.position.x = particles.position.x = w > 900 ? 1.7 : 0;
+    const s = w > 900 ? 1 : 0.72;
+    globe.scale.setScalar(s); particles.scale.setScalar(s);
   };
   resize();
   addEventListener('resize', debounce(resize, 150));
 
-  /* —— pointer reactivity —— */
+  /* —— pointer parallax —— */
   const target = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
   hero.addEventListener('mousemove', (e) => {
     const r = hero.getBoundingClientRect();
@@ -190,17 +195,29 @@ export async function initHeroWebGL() {
   let raf = null, running = false;
   const frame = () => {
     const t = clock.getElapsedTime();
-    cur.x = lerp(cur.x, target.x, 0.05); cur.y = lerp(cur.y, target.y, 0.05);
-    u.uTime.value = t; u.uAmp.value = 0.22 + Math.hypot(cur.x, cur.y) * 0.06;
+    // gentler easing → smoother, calmer parallax
+    cur.x = lerp(cur.x, target.x, 0.035); cur.y = lerp(cur.y, target.y, 0.035);
 
-    group.rotation.y = t * 0.1 + cur.x * 0.5;
-    group.rotation.x = cur.y * 0.4;
-    wire.rotation.y = -t * 0.07;
-    points.rotation.y = t * 0.025;
+    globe.rotation.y = t * 0.05 + cur.x * 0.45;     // slow, confident rotation
+    globe.rotation.x = 0.1 + cur.y * 0.3;
+    particles.rotation.y = -t * 0.018;
+    particles.rotation.x = t * 0.01;
 
-    lights[0].position.set(Math.cos(t*0.7)*3, Math.sin(t*0.5)*3, 2.5);
-    lights[1].position.set(Math.cos(t*0.5+2)*3, Math.sin(t*0.8+1)*3, 2.0);
-    lights[2].position.set(Math.sin(t*0.6)*2.5, Math.cos(t*0.4)*2.5, -1.5);
+    // crystal core — slow counter-rotation + a steady, bright breathing glow
+    core.rotation.y = -t * 0.12;
+    core.rotation.x = t * 0.08;
+    const cp = 0.5 + 0.5 * Math.sin(t * 0.9);
+    coreGlow.scale.setScalar(1.5 + cp * 0.3);
+    coreGlow.material.opacity = 0.78 + cp * 0.22;
+    coreHot.material.opacity = 0.85 + cp * 0.15;
+    crystal.scale.setScalar(1.0 + cp * 0.04);
+
+    // pulse the data hubs (calm, no flicker)
+    for (const s of hubs) {
+      const k = 0.5 + 0.5 * Math.sin(t * 1.1 + s.userData.phase);
+      s.scale.setScalar(0.16 + k * 0.1);
+      s.material.opacity = 0.6 + k * 0.3;
+    }
 
     renderer.render(scene, camera);
     raf = requestAnimationFrame(frame);
