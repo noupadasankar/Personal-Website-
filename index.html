@@ -1,232 +1,457 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="Noupada Sankar - Full Stack Web Developer specializing in React, Node.js, MongoDB, and AWS.">
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#06060a" />
 
-        <link rel="stylesheet" href="assets/css/styles.css">
+  <!-- ===== SEO / Social ===== -->
+  <title>Noupada Sankar — Full Stack Engineer</title>
+  <meta name="description" content="Noupada Sankar — Full Stack Engineer crafting scalable, AI-powered web platforms with React, Node.js, MongoDB and AWS." />
+  <meta name="author" content="Noupada Sankar" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Noupada Sankar — Full Stack Engineer" />
+  <meta property="og:description" content="Crafting scalable, AI-powered web platforms with React, Node.js, MongoDB and AWS." />
+  <meta property="og:image" content="assets/img/profile.png" />
+  <meta name="twitter:card" content="summary_large_image" />
 
-        <!-- =====BOX ICONS===== -->
-        <link href='https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
+  <!-- ===== Performance: preconnect to font hosts ===== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
-        <title>Noupada Sankar</title>
-    </head>
-    <body>
-        <!--===== HEADER =====-->
-        <header class="l-header">
-            <nav class="nav bd-grid">
-                <div>
-                    <a href="#" class="nav__logo">NOUPADA SANKAR</a>
-                </div>
+  <!-- ===== Variable fonts: Space Grotesk (display) + Inter (body) ===== -->
+  <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
 
-                <div class="nav__menu" id="nav-menu">
-                    <ul class="nav__list">
-                        <li class="nav__item"><a href="#home" class="nav__link active">Home</a></li>
-                        <li class="nav__item"><a href="#about" class="nav__link">About</a></li>
-                        <li class="nav__item"><a href="#skills" class="nav__link">Skills</a></li>
-                        <li class="nav__item"><a href="#experience" class="nav__link">Experience</a></li>
-                        <li class="nav__item"><a href="#projects" class="nav__link">Projects</a></li> 
-                        <li class="nav__item"><a href="#contact" class="nav__link">Contact</a></li>
-                    </ul>
-                </div>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" href="public/favicon.ico" sizes="any" />
 
-                <div class="nav__toggle" id="nav-toggle">
-                    <i class='bx bx-menu'></i>
-                </div>
-            </nav>
+  <!-- ===== Import map: lets modules use bare "three" + addons (realistic
+       materials, environment, loaders) without a build step ===== -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+
+<body>
+  <!-- ============================================================
+       PRELOADER  (logo reveal + counter, removed after load)
+  ============================================================= -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <div class="preloader__inner">
+      <span class="preloader__logo">NS</span>
+      <div class="preloader__bar"><span class="preloader__fill" id="preloaderFill"></span></div>
+      <span class="preloader__count" id="preloaderCount">0</span>
+    </div>
+  </div>
+
+  <!-- ===== Accessibility: skip link ===== -->
+  <a href="#hero" class="skip-link">Skip to content</a>
+
+  <!-- ===== Decorative background layers (aurora + mesh + noise) ===== -->
+  <div class="bg-layers" aria-hidden="true">
+    <div class="aurora aurora--1"></div>
+    <div class="aurora aurora--2"></div>
+    <div class="aurora aurora--3"></div>
+    <div class="grid-overlay"></div>
+    <div class="noise"></div>
+  </div>
+
+  <!-- ===== Custom cursor (pointer-fine devices only) ===== -->
+  <div class="cursor" id="cursor" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+
+  <!-- ===== Scroll progress bar ===== -->
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       NAVIGATION
+  ============================================================= -->
+  <header class="nav" id="nav">
+    <nav class="nav__inner" aria-label="Primary">
+      <a href="#hero" class="nav__logo" data-magnetic aria-label="Home — Noupada Sankar">
+        <span class="nav__logo-mark">NS</span>
+        <span class="nav__logo-text">Noupada Sankar</span>
+      </a>
+
+      <ul class="nav__list" id="navList">
+        <li><a href="#about"    class="nav__link" data-nav>About</a></li>
+        <li><a href="#skills"   class="nav__link" data-nav>Skills</a></li>
+        <li><a href="#work"     class="nav__link" data-nav>Work</a></li>
+        <li><a href="#contact"  class="nav__link" data-nav>Contact</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <button class="theme-toggle" id="themeToggle" type="button"
+                aria-label="Switch color theme" title="Switch theme (dark / light / auto)">
+          <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg>
+          <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-13a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V5a1 1 0 0 1 1-1Zm0 14a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1ZM4 11a1 1 0 0 1 1-1H4a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1Zm15 0a1 1 0 0 1 1-1h1a1 1 0 0 1 0 2h-1a1 1 0 0 1-1-1ZM6.34 6.34a1 1 0 0 1 1.42 0l.7.7A1 1 0 1 1 7.05 8.46l-.7-.7a1 1 0 0 1 0-1.42Zm9.45 9.45a1 1 0 0 1 1.42 0l.7.7a1 1 0 0 1-1.42 1.42l-.7-.7a1 1 0 0 1 0-1.42ZM17.66 6.34a1 1 0 0 1 0 1.42l-.7.7a1 1 0 1 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 0ZM8.46 16.95a1 1 0 0 1 0 1.42l-.7.7a1 1 0 0 1-1.42-1.42l.7-.7a1 1 0 0 1 1.42 0Z"/></svg>
+        </button>
+
+        <a href="#contact" class="btn btn--sm btn--primary nav__cta" data-magnetic>Let's talk</a>
+
+        <button class="nav__burger" id="navBurger" type="button"
+                aria-label="Open menu" aria-expanded="false" aria-controls="navList">
+          <span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ============================================================
+         HERO
+    ============================================================= -->
+    <section class="hero" id="hero">
+      <!-- WebGL orb renders here (progressive enhancement). Falls back to the
+           CSS blob below when WebGL is unavailable or reduced-motion is set. -->
+      <canvas class="hero__canvas" id="heroCanvas" aria-hidden="true"></canvas>
+      <div class="hero__blob" id="heroBlob" aria-hidden="true"></div>
+
+      <div class="hero__inner container">
+        <p class="hero__eyebrow" data-reveal>
+          <span class="status-dot"></span> Available for opportunities · 2026
+        </p>
+
+        <h1 class="hero__title" aria-label="Noupada Sankar">
+          <span class="hero__line" data-split aria-hidden="true">Noupada Sankar</span>
+        </h1>
+
+        <div class="hero__role" aria-live="polite">
+          <span class="hero__role-static">Full&nbsp;Stack&nbsp;</span>
+          <span class="hero__role-rotate" id="roleRotate"
+                data-roles="Engineer,Problem Solver,AI Platform Builder,React Specialist"></span>
+          <span class="hero__caret" aria-hidden="true"></span>
+        </div>
+
+        <p class="hero__lead" data-reveal>
+          I design and engineer scalable, AI-powered web platforms — building
+          everything from resume-intelligence and role-based access systems to
+          polished, production-grade interfaces with <strong>React</strong>,
+          <strong>Node.js</strong>, <strong>MongoDB</strong> and <strong>AWS</strong>.
+        </p>
+
+        <div class="hero__cta" data-reveal>
+          <a href="#work" class="btn btn--primary" data-magnetic>
+            View my work
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2h12.2l-4.6-4.6L13 5Z"/></svg>
+          </a>
+          <a href="SANKAR_RESUME.pdf" download class="btn btn--ghost" data-link="resume" data-magnetic>
+            Download CV
+          </a>
+        </div>
+
+        <ul class="hero__social" data-reveal aria-label="Social profiles">
+          <li><a href="https://github.com/noupadasankar" target="_blank" rel="noopener" aria-label="GitHub" data-link="github" data-magnetic>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2A10 10 0 0 0 8.84 21.5c.5.08.66-.22.66-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.4 9.4 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.16.57.67.48A10 10 0 0 0 12 2Z"/></svg>
+          </a></li>
+          <li><a href="https://www.linkedin.com/in/shankar-noupada-7a5b77301" target="_blank" rel="noopener" aria-label="LinkedIn" data-link="linkedin" data-magnetic>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M6.94 5a1.94 1.94 0 1 1-3.88 0 1.94 1.94 0 0 1 3.88 0ZM3.3 8.4h3.3V21H3.3V8.4Zm5.46 0h3.16v1.72h.05c.44-.83 1.5-1.72 3.1-1.72 3.32 0 3.93 2.18 3.93 5v6.6h-3.3v-5.85c0-1.4-.02-3.2-1.95-3.2-1.96 0-2.26 1.53-2.26 3.1V21h-3.3V8.4Z"/></svg>
+          </a></li>
+          <li><a href="https://leetcode.com/u/noupadashankar78/" target="_blank" rel="noopener" aria-label="LeetCode" data-link="leetcode" data-magnetic>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M13.48 2.1a1.4 1.4 0 0 1 .98 2.4l-3.3 3.3 4.34 4.35a1.4 1.4 0 1 1-1.98 1.98l-5.3-5.34a1.4 1.4 0 0 1 0-1.98l4.3-4.3c.26-.27.6-.41.96-.41Zm5.1 14.5a1.4 1.4 0 0 1 0 2.8h-6.2a1.4 1.4 0 1 1 0-2.8h6.2ZM7.07 11.9l2.6 2.6-1.3 1.3a1.95 1.95 0 0 0 0 2.76l.06.06a1.95 1.95 0 0 0 2.76 0l1.86-1.86a1.4 1.4 0 1 1 1.98 1.98l-1.86 1.86a4.75 4.75 0 0 1-6.72 0l-.06-.06a4.75 4.75 0 0 1 0-6.72l.64-.65Z"/></svg>
+          </a></li>
+        </ul>
+      </div>
+
+      <a href="#about" class="scroll-indicator" aria-label="Scroll to about section">
+        <span class="scroll-indicator__text">Scroll</span>
+        <span class="scroll-indicator__line"></span>
+      </a>
+    </section>
+
+    <!-- ============================================================
+         ABOUT  (intro + animated stats + timeline)
+    ============================================================= -->
+    <section class="section about" id="about" aria-labelledby="about-title">
+      <div class="container">
+        <header class="section__head" data-reveal>
+          <span class="section__index">01</span>
+          <h2 class="section__title" id="about-title">About</h2>
         </header>
 
-        <main class="l-main">
-            <!--===== HOME =====-->
-            <section class="home bd-grid" id="home">
-                <div class="home__data">
-                    <h1 class="home__title">
-                      Hi,<br>
-                      I'm <span class="home__title-color">Sankar</span><br>
-                      Full Stack Developer
-                    </h1>
+        <div class="bento about__grid">
+          <!-- profile photo -->
+          <figure class="about__media card--tilt" data-tilt data-reveal>
+            <img src="assets/img/profile.png" alt="Portrait of Noupada Sankar" width="640" height="800" loading="lazy" decoding="async" />
+            <figcaption class="about__media-badge"><span class="status-dot"></span> Open to work</figcaption>
+          </figure>
 
-                    <p style="margin-top: 1rem; max-width: 420px; color: var(--text-color);">
-                      I build scalable web applications and AI-powered platforms using
-                      React, Node.js, MongoDB, Firebase, and AWS.
-                    </p>
+          <!-- intro card -->
+          <article class="card card--glass about__intro" data-reveal>
+            <p class="about__lead">
+              I'm a <strong>Full Stack Engineer</strong> currently building
+              AI-driven recruitment &amp; placement platforms at
+              <strong>DhiAspire&nbsp;AI</strong>.
+            </p>
+            <p class="about__text">
+              I care deeply about the craft — clean architecture on the backend,
+              pixel-honest interfaces on the front, and systems that stay reliable
+              under real production load. I enjoy turning fuzzy problems into
+              calm, scalable products that people actually like to use.
+            </p>
+            <a href="#contact" class="link-arrow" data-magnetic>
+              Get in touch
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M13 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2h12.2l-4.6-4.6L13 5Z"/></svg>
+            </a>
+          </article>
 
-                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                      <a href="#contact" class="button">Contact Me</a>
-                      <a href="SANKAR_RESUME.pdf" download class="button" style="background-color: transparent; border: 2px solid var(--first-color); color: var(--first-color);">Download CV</a>
-                    </div>
-                
-<div class="home__social" style="flex-direction: row; gap: 1.5rem; margin-top: 2rem; align-items: center;">
-                  <a href="https://www.linkedin.com/in/shankar-noupada-7a5b77301" class="home__social-icon" target="_blank">
-                    <i class='bx bxl-linkedin'></i>
-                  </a>
+          <!-- stat cards (count-up) -->
+          <article class="card card--glass stat" data-reveal>
+            <span class="stat__num" data-count="15" data-suffix="+">0</span>
+            <span class="stat__label">Technologies shipped</span>
+          </article>
+          <article class="card card--glass stat" data-reveal>
+            <span class="stat__num" data-count="100" data-suffix="%">0</span>
+            <span class="stat__label">Ownership, end-to-end</span>
+          </article>
+          <article class="card card--glass stat" data-reveal>
+            <span class="stat__num" data-count="5" data-suffix="+">0</span>
+            <span class="stat__label">Production projects</span>
+          </article>
 
-                  <a href="https://github.com/noupadasankar" class="home__social-icon" target="_blank">
-                    <i class='bx bxl-github'></i>
-                  </a>
-
-                  <a href="https://leetcode.com/u/noupadashankar78/" class="home__social-icon" target="_blank">
-                    <i class='bx bx-code-alt'></i>
-                  </a>
+          <!-- timeline card spanning full width -->
+          <article class="card card--glass about__timeline" data-reveal aria-label="Experience and education timeline">
+            <h3 class="card__kicker">Experience &amp; Education</h3>
+            <ol class="timeline">
+              <li class="timeline__item" data-reveal>
+                <div class="timeline__dot"></div>
+                <div class="timeline__body">
+                  <span class="timeline__period">Oct 2025 — Present</span>
+                  <h4 class="timeline__role">Full Stack Developer Intern</h4>
+                  <p class="timeline__org">DhiAspire AI</p>
+                  <p class="timeline__desc">
+                    Built an AI placement-training platform: resume analysis,
+                    JD-based candidate scoring, RBAC across colleges/departments/
+                    students, and multi-tenant infrastructure — working the full
+                    stack from UI to cloud.
+                  </p>
                 </div>
-</div>
-
-                
-
-                <div class="home__img">
-                    <div class="blob">
-                        <img src="assets/img/profile.png" alt="Profile">
-                    </div>
+              </li>
+              <li class="timeline__item" data-reveal>
+                <div class="timeline__dot"></div>
+                <div class="timeline__body">
+                  <span class="timeline__period">2021 — 2025</span>
+                  <h4 class="timeline__role">B.Tech, Computer Science</h4>
+                  <p class="timeline__org">University</p>
+                  <p class="timeline__desc">
+                    Foundations in data structures, databases, distributed
+                    systems and cloud — paired with hands-on full-stack building.
+                  </p>
                 </div>
-            </section>
+              </li>
+            </ol>
+          </article>
+        </div>
+      </div>
+    </section>
 
-            <!--===== ABOUT =====-->
-            <section class="about section " id="about">
-                <h2 class="section-title">About</h2>
+    <!-- ============================================================
+         SKILLS  (cards + progress rings + marquee)
+    ============================================================= -->
+    <section class="section skills" id="skills" aria-labelledby="skills-title">
+      <div class="container">
+        <header class="section__head" data-reveal>
+          <span class="section__index">02</span>
+          <h2 class="section__title" id="skills-title">Skills</h2>
+        </header>
 
-                <div class="about__container bd-grid">
-                    <div class="about__img">
-                        <img src="assets/img/prefil1.jpg" alt="">
-                    </div>
-                    
-                    <div>
-                        <h2 class="about__subtitle" style="color: var(--first-color); font-size: 1.5rem; margin-bottom: 1rem;">I'm Sankar</h2>
-                        <div class="about__text" style="line-height: 1.8; color: var(--text-color);">
-                            <p style="margin-bottom: 1rem;">
-                                I am a <strong style="color: var(--title-color);">Full Stack Web Developer</strong> working on AI-based recruitment and placement platforms. I specialize in building modern, responsive, and scalable web applications using <strong style="color: var(--title-color);">React.js, Node.js, MongoDB, Firebase, and AWS</strong>.
-                            </p>
-                            <p style="margin-bottom: 1rem;">
-                                Currently, I work as a Full Stack Developer Intern at <strong style="color: var(--title-color);">DhiAspire AI</strong>, where I build features like resume analysis, JD-based scoring, role-based access control, and multi-tenant systems for colleges and students.
-                            </p>
-                            <p>
-                                I enjoy solving real-world problems, designing clean user experiences, and building systems that scale reliably in production.
-                            </p>
-                        </div>
-                    </div>                                   
-                </div>
-            </section>
+        <div class="bento skills__grid">
+          <article class="card card--glass card--tilt skill-card" data-tilt data-reveal>
+            <h3 class="skill-card__title">Frontend</h3>
+            <p class="skill-card__list">React.js · JavaScript (ES6+) · HTML5 · CSS3 · Tailwind · Bootstrap · Material UI</p>
+          </article>
+          <article class="card card--glass card--tilt skill-card" data-tilt data-reveal>
+            <h3 class="skill-card__title">Backend</h3>
+            <p class="skill-card__list">Node.js · Express.js · REST APIs · Firebase · Auth &amp; RBAC</p>
+          </article>
+          <article class="card card--glass card--tilt skill-card" data-tilt data-reveal>
+            <h3 class="skill-card__title">Data &amp; Cloud</h3>
+            <p class="skill-card__list">MongoDB · MySQL · SQL · AWS · Git &amp; GitHub</p>
+          </article>
 
-            <!--===== SKILLS =====-->
-            <section class="skills section" id="skills">
-                <h2 class="section-title">Skills</h2>
-
-                <div class="skills__container bd-grid">          
-                    <div>
-                        <h2 class="skills__subtitle">Professional Skills</h2>
-                        <p class="skills__text">Technologies I use to build full-stack, cloud-ready web applications.</p>
-                        <div style="margin-top: 2rem;">
-                            <h3 style="font-size: 1.25rem; color: var(--title-color); margin-bottom: 1rem;">Technical Skills</h3>
-                            <ul style="line-height: 2; color: var(--text-color); margin-left: 1rem;">
-                                <li><strong style="color: var(--first-color);">Programming Languages:</strong> Java, JavaScript, HTML, CSS, SQL</li>
-                                <li><strong style="color: var(--first-color);">Frameworks & Libraries:</strong> React.js, Node.js, Express.js, NPM, Bootstrap, Material UI, Tailwind CSS</li>
-                                <li><strong style="color: var(--first-color);">Databases & Tools:</strong> MongoDB, MySQL, Firebase, GitHub, AWS, Git</li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div>              
-                        <img src="assets/img/professional%20skills.gif" alt="" class="skills__img">
-                    </div>
-                </div>
-            </section>
-
-            <!--===== EXPERIENCE =====-->
-            <section class="experience section" id="experience">
-              <h2 class="section-title">Experience</h2>
-
-              <div class="bd-grid">
-                <div class="card" style="margin: 0 auto; max-width: 800px; padding: 2.5rem; text-align: left;">
-                  <h3 style="color: var(--first-color); font-size: 1.5rem; margin-bottom: 0.5rem;">DhiAspire AI – Full Stack Developer Intern</h3>
-                  <p style="color: var(--text-color-light); font-weight: 500; margin-bottom: 1.5rem;"><i>Oct 2025 – Present</i></p>
-
-                  <ul style="margin-left: 1.5rem; line-height: 2; color: var(--text-color); list-style-type: disc;">
-                    <li>Built AI-based placement training platform with resume analysis and mock interviews.</li>
-                    <li>Implemented JD-based scoring to evaluate candidate-job alignment.</li>
-                    <li>Designed role-based access control (RBAC) for colleges, departments, and students.</li>
-                    <li>Worked across frontend, backend, database, and cloud infrastructure.</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            <!--===== PROJECTS =====-->
-            <section class="work section" id="projects">
-                <h2 class="section-title">Projects</h2>
-
-                <div class="grid container">
-                    <div class="card">
-                        <div class="card_img">
-                            <img src="assets/img/health project 1.png" alt="TeleHealth App">
-                        </div>
-                        <div class="card_body">
-                            <h2 class="card_title">TeleHealth Web Application</h2>
-                            <p>
-                                Real-time telehealth platform enabling secure video consultations,
-                                authentication, and cloud-based data storage.
-                            </p>
-                            <p style="margin: 10px 0;"><b>Tech:</b> React.js, Firebase, Tailwind CSS</p>
-                            <div style="display: flex; gap: 10px;">
-                                <a href="#" class="read_more" style="width: 100%; text-align: center;">GitHub Repo</a>
-                                <a href="#" class="read_more" style="width: 100%; text-align: center;">Live Demo</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card_img">
-                            <img src="assets/img/project2.jpeg" alt="Citizen Grievance Management Portal">
-                        </div>
-                        <div class="card_body">
-                            <h2 class="card_title">Citizen Grievance Management Portal</h2>
-                            <p>
-                                Centralized digital platform for citizens to report civic issues, track statuses, and for authorities to manage resolutions with location-based tagging.
-                            </p>
-                            <p style="margin: 10px 0;"><b>Tech:</b> Full Stack Web Development</p>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                    
-                                <a href="#" class="read_more" style="flex: 1; text-align: center; min-width: 30%;">GitHub Repo</a>
-                                <a href="#" class="read_more" style="flex: 1; text-align: center; min-width: 30%;">Live Demo</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!--===== CONTACT =====-->
-            <section class="contact section" id="contact">
-                <h2 class="section-title">Contact</h2>
-
-                <div class="contact__container bd-grid">
-                    <form action="https://formsubmit.co/noupadashankar78@gmail.com" method="POST" class="contact__form">
-<!--                    <form action="" class="contact__form">-->
-                        <input type="text" placeholder="Name" class="contact__input" name="name" required>
-                        <input type="email" placeholder="Email" class="contact__input" name="email" required>
-                        <textarea name="" id="" cols="0" rows="10" class="contact__input"></textarea>
-                        <input type="submit" value="Submit" class="contact__button button">
-                    </form>
-                </div>
-            </section>
-        </main>
-        
-
-        <!--===== FOOTER =====-->
-        <footer class="footer">
-            <p class="footer__title">Noupada Sankar</p>
-            <div class="footer__social">
-                <a href="#" class="footer__icon"><i class='bx bxl-facebook' ></i></a>
-                <a href="#" class="footer__icon"><i class='bx bxl-instagram' ></i></a>
-                <a href="#" class="footer__icon"><i class='bx bxl-twitter' ></i></a>
+          <!-- circular progress rings -->
+          <article class="card card--glass skills__rings" data-reveal aria-label="Proficiency levels">
+            <div class="ring" data-ring="90" role="img" aria-label="Frontend proficiency 90 percent">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="ring__track" cx="60" cy="60" r="52"></circle>
+                <circle class="ring__fill" cx="60" cy="60" r="52"></circle>
+              </svg>
+              <span class="ring__pct" data-count="90" data-suffix="%">0</span>
+              <span class="ring__label">Frontend</span>
             </div>
-            <p class="footer__copy">&#169; Noupada Sankar. All rights reserved</p>
-        </footer>
-<!--        <script id="BotPenguin-messenger-widget" src="https://cdn.botpenguin.com/botpenguin.js" defer>63d6d875cf8ccc05baece747,63d6d7f98070ee06f3385b94</script>-->
+            <div class="ring" data-ring="82" role="img" aria-label="Backend proficiency 82 percent">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="ring__track" cx="60" cy="60" r="52"></circle>
+                <circle class="ring__fill" cx="60" cy="60" r="52"></circle>
+              </svg>
+              <span class="ring__pct" data-count="82" data-suffix="%">0</span>
+              <span class="ring__label">Backend</span>
+            </div>
+            <div class="ring" data-ring="78" role="img" aria-label="Cloud and databases proficiency 78 percent">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="ring__track" cx="60" cy="60" r="52"></circle>
+                <circle class="ring__fill" cx="60" cy="60" r="52"></circle>
+              </svg>
+              <span class="ring__pct" data-count="78" data-suffix="%">0</span>
+              <span class="ring__label">Cloud / DB</span>
+            </div>
+          </article>
+        </div>
+      </div>
 
+      <!-- infinite marquee -->
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee__track">
+          <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span>
+          <span>Node.js</span><span>Express</span><span>TypeScript</span><span>Tailwind</span>
+          <span>MongoDB</span><span>MySQL</span><span>Firebase</span><span>AWS</span>
+          <span>Git</span><span>Java</span>
+          <!-- duplicate for seamless loop -->
+          <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span>
+          <span>Node.js</span><span>Express</span><span>TypeScript</span><span>Tailwind</span>
+          <span>MongoDB</span><span>MySQL</span><span>Firebase</span><span>AWS</span>
+          <span>Git</span><span>Java</span>
+        </div>
+      </div>
+    </section>
 
-        <!--===== SCROLL REVEAL =====-->
-        <script src="https://unpkg.com/scrollreveal"></script>
+    <!-- ============================================================
+         WORK / PROJECTS
+    ============================================================= -->
+    <section class="section work" id="work" aria-labelledby="work-title">
+      <div class="container">
+        <header class="section__head" data-reveal>
+          <span class="section__index">03</span>
+          <h2 class="section__title" id="work-title">Selected Work</h2>
+        </header>
 
-        <!--===== MAIN JS =====-->
-        <script src="assets/js/main.js"></script>
-    </body>
+        <!-- filter -->
+        <div class="filter" role="tablist" aria-label="Filter projects" data-reveal>
+          <button class="filter__btn is-active" data-filter="all" role="tab" aria-selected="true">All</button>
+          <button class="filter__btn" data-filter="fullstack" role="tab" aria-selected="false">Full Stack</button>
+          <button class="filter__btn" data-filter="frontend" role="tab" aria-selected="false">Frontend</button>
+        </div>
+
+        <!-- Project cards are injected here from assets/js/config.js -->
+        <div class="work__grid" id="workGrid"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         CONTACT
+    ============================================================= -->
+    <section class="section contact" id="contact" aria-labelledby="contact-title">
+      <div class="container">
+        <header class="section__head" data-reveal>
+          <span class="section__index">04</span>
+          <h2 class="section__title" id="contact-title">Let's build something</h2>
+        </header>
+
+        <div class="bento contact__grid">
+          <form class="card card--glass contact__form" id="contactForm" novalidate data-reveal
+                action="https://formsubmit.co/noupadashankar78@gmail.com" method="POST">
+            <div class="field">
+              <input class="field__input" type="text" id="name" name="name" placeholder=" " required autocomplete="name" />
+              <label class="field__label" for="name">Your name</label>
+              <span class="field__error" data-error-for="name"></span>
+            </div>
+            <div class="field">
+              <input class="field__input" type="email" id="email" name="email" placeholder=" " required autocomplete="email" />
+              <label class="field__label" for="email">Email address</label>
+              <span class="field__error" data-error-for="email"></span>
+            </div>
+            <div class="field">
+              <textarea class="field__input field__input--area" id="message" name="message" placeholder=" " rows="5" required></textarea>
+              <label class="field__label" for="message">Tell me about your project</label>
+              <span class="field__error" data-error-for="message"></span>
+            </div>
+            <button class="btn btn--primary btn--block" type="submit" id="submitBtn" data-magnetic>
+              <span class="btn__label">Send message</span>
+              <span class="btn__spinner" aria-hidden="true"></span>
+            </button>
+            <p class="contact__status" id="contactStatus" role="status" aria-live="polite"></p>
+          </form>
+
+          <aside class="contact__aside">
+            <article class="card card--glass contact__cta" data-reveal>
+              <h3 class="card__kicker">Prefer email?</h3>
+              <a href="mailto:noupadashankar78@gmail.com" class="contact__mail" data-link="email" data-link-text data-magnetic>noupadashankar78@gmail.com</a>
+            </article>
+            <article class="card card--glass contact__socials" data-reveal>
+              <h3 class="card__kicker">Find me online</h3>
+              <ul>
+                <li><a href="https://github.com/noupadasankar" target="_blank" rel="noopener" data-link="github" data-magnetic>GitHub <span>↗</span></a></li>
+                <li><a href="https://www.linkedin.com/in/shankar-noupada-7a5b77301" target="_blank" rel="noopener" data-link="linkedin" data-magnetic>LinkedIn <span>↗</span></a></li>
+                <li><a href="https://leetcode.com/u/noupadashankar78/" target="_blank" rel="noopener" data-link="leetcode" data-magnetic>LeetCode <span>↗</span></a></li>
+                <li><a href="#" target="_blank" rel="noopener" data-link="twitter" data-magnetic>Twitter / X <span>↗</span></a></li>
+              </ul>
+            </article>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================= -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <span class="footer__logo">NS</span>
+      <p class="footer__copy">© <span id="year">2026</span> Noupada Sankar — Designed &amp; built from scratch.</p>
+      <a href="#hero" class="footer__top" aria-label="Back to top" data-magnetic>Back to top ↑</a>
+    </div>
+  </footer>
+
+  <!-- back to top floating -->
+  <button class="to-top" id="toTop" type="button" aria-label="Back to top">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 5l7 7-1.4 1.4L13 8.8V20h-2V8.8L6.4 13.4 5 12l7-7Z"/></svg>
+  </button>
+
+  <!-- ============================================================
+       PROJECT MODAL  (case study)
+  ============================================================= -->
+  <div class="modal" id="projectModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__panel card--glass" role="document">
+      <button class="modal__close" type="button" aria-label="Close" data-close-modal>
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3 10.6 10.6 16.9 4.3z"/></svg>
+      </button>
+      <div class="modal__media" id="modalMedia">
+        <img id="modalImg" src="" alt="" />
+        <div class="modal__viewer" id="modalViewer" aria-hidden="true" title="Drag to rotate"></div>
+      </div>
+      <div class="modal__content">
+        <h3 class="modal__title" id="modalTitle"></h3>
+        <ul class="modal__tags" id="modalTags"></ul>
+        <div class="modal__block"><h4>Challenge</h4><p id="modalChallenge"></p></div>
+        <div class="modal__block"><h4>Solution</h4><p id="modalSolution"></p></div>
+        <div class="modal__block"><h4>Result</h4><p id="modalResult"></p></div>
+        <div class="modal__actions">
+          <a class="btn btn--primary btn--sm" id="modalLive" href="#" target="_blank" rel="noopener" data-magnetic>Live demo</a>
+          <a class="btn btn--ghost btn--sm" id="modalRepo" href="#" target="_blank" rel="noopener" data-magnetic>Source</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SCRIPTS  (GSAP + ScrollTrigger + Lenis from CDN, then app)
+  ============================================================= -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+  <script type="module" src="assets/js/main.js"></script>
+</body>
 </html>

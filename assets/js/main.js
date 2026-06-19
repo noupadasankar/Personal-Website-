@@ -1,59 +1,75 @@
-/*===== MENU SHOW =====*/ 
-const showMenu = (toggleId, navId) =>{
-    const toggle = document.getElementById(toggleId),
-    nav = document.getElementById(navId)
+/* =============================================================
+   main.js — application entry point
+   Orchestrates the boot sequence and wires every module together.
+   ES6 modules · runs after DOM parse (script is type="module", deferred).
+============================================================= */
+import { $ } from './modules/utils.js';
+import { renderContent } from './modules/content.js';
+import { initSmoothScroll } from './modules/smooth-scroll.js';
+import { initPreloader } from './modules/preloader.js';
+import { initCursor, initMagnetic } from './modules/cursor.js';
+import { initNavigation, initTheme } from './modules/navigation.js';
+import { buildHeroTimeline, initTypewriter, initHeroParallax } from './modules/hero.js';
+import { initHeroWebGL } from './modules/hero-webgl.js';
+import { initReveals, initCounters } from './modules/animations.js';
+import { initFilter, initTilt, initProjectModal } from './modules/projects.js';
+import { initContactForm } from './modules/contact.js';
 
-    if(toggle && nav){
-        toggle.addEventListener('click', ()=>{
-            nav.classList.toggle('show')
-        })
-    }
+/* —— Static niceties that don't depend on the loader —— */
+function initChrome() {
+  // Dynamic year in footer
+  const year = $('#year');
+  if (year) year.textContent = new Date().getFullYear();
+
+  // Console easter egg 🥚
+  const brand = 'color:#7c5cff;font:600 14px Space Grotesk,sans-serif';
+  const soft  = 'color:#7a7b8c;font:13px Inter,sans-serif';
+  console.log('%cNoupada Sankar — Full Stack Engineer', brand);
+  console.log('%cLike what you see under the hood? Let\'s talk → noupadashankar78@gmail.com', soft);
+  console.log('%cBuilt from scratch with vanilla JS, GSAP & Lenis. No framework was harmed. 🛠️', soft);
 }
-showMenu('nav-toggle','nav-menu')
 
-/*==================== REMOVE MENU MOBILE ====================*/
-const navLink = document.querySelectorAll('.nav__link')
+/* —— Boot sequence —— */
+function boot() {
+  // Theme first (avoids a flash of the wrong palette).
+  initTheme();
 
-function linkAction(){
-    const navMenu = document.getElementById('nav-menu')
-    // When we click on each nav__link, we remove the show-menu class
-    navMenu.classList.remove('show')
+  // Hydrate links + project cards from config.js BEFORE anything queries them.
+  renderContent();
+
+  initChrome();
+
+  // Smooth scroll wires Lenis into the GSAP ticker.
+  initSmoothScroll();
+
+  // Persistent UI.
+  initNavigation();
+  initCursor();
+  initMagnetic();
+
+  // Section behaviours (these self-gate on reduced-motion internally).
+  initReveals();
+  initCounters();
+  initTypewriter();
+  initHeroParallax();
+  initHeroWebGL();        // async, lazy-loads Three.js; self-gates & enhances progressively
+  initFilter();
+  initTilt();
+  initProjectModal();
+  initContactForm();
+
+  // Build the hero intro now, play it the instant the preloader lifts.
+  const heroTl = buildHeroTimeline();
+  initPreloader().then(() => {
+    heroTl?.play();
+    // Recalculate ScrollTrigger positions once everything is laid out.
+    window.ScrollTrigger?.refresh();
+  });
 }
-navLink.forEach(n => n.addEventListener('click', linkAction))
 
-/*==================== SCROLL SECTIONS ACTIVE LINK ====================*/
-const sections = document.querySelectorAll('section[id]')
-
-function scrollActive(){
-    const scrollY = window.pageYOffset
-
-    sections.forEach(current =>{
-        const sectionHeight = current.offsetHeight
-        const sectionTop = current.offsetTop - 50;
-        sectionId = current.getAttribute('id')
-
-        const navLink = document.querySelector('.nav__menu a[href*=' + sectionId + ']');
-        if(navLink) {
-            if(scrollY > sectionTop && scrollY <= sectionTop + sectionHeight){
-                navLink.classList.add('active');
-            }else{
-                navLink.classList.remove('active');
-            }
-        }
-    })
+// type="module" scripts are deferred, so the DOM is ready — but guard anyway.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot, { once: true });
+} else {
+  boot();
 }
-window.addEventListener('scroll', scrollActive)
-
-/*===== SCROLL REVEAL ANIMATION =====*/
-const sr = ScrollReveal({
-    origin: 'top',
-    distance: '60px',
-    duration: 2000,
-    delay: 200,
-//     reset: true
-});
-
-sr.reveal('.home__data, .about__img, .skills__subtitle, .skills__text',{}); 
-sr.reveal('.home__img, .about__subtitle, .about__text, .skills__img',{delay: 400}); 
-sr.reveal('.home__social-icon',{ interval: 200}); 
-sr.reveal('.skills__data, .card, .contact__input',{interval: 200}); 
