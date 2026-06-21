@@ -70,7 +70,7 @@ export const CONFIG = {
       year:     "2026",
       category: "fullstack frontend",
       desc:     "One-line description of your project — what it does and who it's for.",
-      image:    "assets/img/project-3.svg",   // replace with assets/img/project-3.jpg (1200×750)
+      image:    "assets/img/Screenshot 2026-06-14 193120.png",   // replace with assets/img/project-3.jpg (1200×750)
       imageAlt: "Project preview",
       tags:     ["Tech", "Stack", "Here"],
       live:     "",
